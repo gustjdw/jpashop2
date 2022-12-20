@@ -41,18 +41,20 @@ public class OrderSimpleApiController {
 
     @GetMapping("/api/v2/simple-orders")
     public List<SimpleOrderDto> ordersV2() {
-        // order 2개
-        // N + 1 문제 -> 1 + 회원 N + 배송 N
         List<Order> orders = orderRepository.findAllByString(new OrderSearch());
+        List<SimpleOrderDto> result = orders.stream()
+                .map(o -> new SimpleOrderDto(o))
+                .collect(Collectors.toList());
 
-//        List<SimpleOrderDto> result = orders.stream()
-//                .map(o -> new SimpleOrderDto(o))
-//                .collect(Collectors.toList());
-//        return result;
+        return result;
+    }
 
+    @GetMapping("/api/v3/simple-orders")
+    public List<SimpleOrderDto> orderV3() {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
         return orders.stream()
-                .map(SimpleOrderDto::new)
-                .collect(toList());
+                .map(o -> new SimpleOrderDto(o))
+                .collect(Collectors.toList());
     }
 
     @Data
