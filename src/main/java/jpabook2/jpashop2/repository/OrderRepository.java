@@ -86,11 +86,12 @@ public class OrderRepository {
         return query.getResultList();
     }
 
+    // 간단한 주문 조회 V3: 엔티티를 DTO로 변환 - fetch join 최적화
     public List<Order> findAllWithMemberDelivery() {
         return em.createQuery(
-                "select o from Order o" +
-                        " join fetch o.member m" +
-                        " join fetch o.delivery d", Order.class)
+                    "select o from Order o" +
+                            " join fetch o.member m" +
+                            " join fetch o.delivery d", Order.class)
                 .getResultList();
     }
 }
