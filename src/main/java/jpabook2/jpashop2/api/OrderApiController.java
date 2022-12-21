@@ -6,6 +6,8 @@ import jpabook2.jpashop2.domain.OrderItem;
 import jpabook2.jpashop2.domain.OrderStatus;
 import jpabook2.jpashop2.repository.OrderRepository;
 import jpabook2.jpashop2.repository.OrderSearch;
+import jpabook2.jpashop2.repository.order.query.OrderQueryDto;
+import jpabook2.jpashop2.repository.order.query.OrderQueryRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +21,16 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 public class OrderApiController {
+    /**
+     * xToMany
+     */
 
     private final OrderRepository orderRepository;
+    private final OrderQueryRepository orderQueryRepository;
 
+    /**
+     * 주문 조회 V1: 엔티티 직접 노출
+     */
     @GetMapping("/api/v1/orders")
     public List<Order> ordersV1() {
         List<Order> all = orderRepository.findAllByString(new OrderSearch());
@@ -37,6 +46,9 @@ public class OrderApiController {
         return all;
     }
 
+    /**
+     * 주문 조회 V2: 엔티티를 DTO로 변환
+     */
     @GetMapping("/api/v2/orders")
     public List<OrderDto> ordersV2() {
         List<Order> orders = orderRepository.findAllByString(new OrderSearch());
@@ -46,6 +58,9 @@ public class OrderApiController {
         return collect;
     }
 
+    /**
+     * 주문 조회 V2: 엔티티를 DTO로 변환 - fetch join 최적화
+     */
     @GetMapping("/api/v3/orders")
     public List<OrderDto> ordersV3() {
         List<Order> orders = orderRepository.findAllWithItem();
@@ -61,6 +76,7 @@ public class OrderApiController {
     }
 
     /**
+     * 주문 조회 V3.1: 엔티티를 DTO로 변환 - 페이징과 한계 돌파
      * V3.1 엔티티를 조회해서 DTO로 변환 (페이징 고려)
      * - ToOne 관계만 우선 모두 fetch join으로 최적화
      * - 컬렉션 관계는 hibernate.default_batch_fetch_size, @BatchSize로 최적화
@@ -79,6 +95,15 @@ public class OrderApiController {
                 .collect(Collectors.toList());
         return result;
     }
+
+    /**
+     * 주문 조회 V4: JPA에서 DTO 직접 조회
+     */
+    @GetMapping("/api/v4/orders")
+    public List<OrderQueryDto> ordersV4() {
+        return orderQueryRepository.findOrderQueryDtos();
+    }
+
 
     @Getter
     static class OrderDto {

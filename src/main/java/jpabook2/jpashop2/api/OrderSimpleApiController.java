@@ -26,9 +26,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderSimpleApiController {
 
+    /**
+     * xToOne
+     */
+
     private final OrderRepository orderRepository;
     private final OrderSimpleQueryRepository orderSimpleQueryRepository;
 
+    // 간단한 주문 조회 V1: 엔티티를 직접 노출
     @GetMapping("/api/v1/simple-orders")
     public List<Order> ordersV1() {
         List<Order> all = orderRepository.findAllByString(new OrderSearch());
@@ -39,6 +44,7 @@ public class OrderSimpleApiController {
         return all;
     }
 
+    // 간단한 주문 조회 V2: 엔티티를 DTO로 변환
     @GetMapping("/api/v2/simple-orders")
     public List<SimpleOrderDto> ordersV2() {
         List<Order> orders = orderRepository.findAllByString(new OrderSearch());
@@ -49,6 +55,7 @@ public class OrderSimpleApiController {
         return result;
     }
 
+    // 간단한 주문 조회 V3: 엔티티를 DTO로 변환 - fetch join 최적화
     @GetMapping("/api/v3/simple-orders")
     public List<SimpleOrderDto> orderV3() {
         List<Order> orders = orderRepository.findAllWithMemberDelivery();
@@ -57,6 +64,7 @@ public class OrderSimpleApiController {
                 .collect(Collectors.toList());
     }
 
+    // 간단한 주문 조회 V4: JPA에서 DTO로 바로 조회
     @GetMapping("/api/v4/simple-orders")
     public List<OrderSimpleQueryDto> orderV4() {
         return orderSimpleQueryRepository.findOrderDtos();
