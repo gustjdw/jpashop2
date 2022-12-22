@@ -45,6 +45,7 @@ public class OrderQueryRepository {
 
         Map<Long, List<OrderItemQueryDto>> orderItemMap = orderItems.stream()
                 .collect(Collectors.groupingBy(orderItemQueryDto -> orderItemQueryDto.getOrderId()));
+
         return orderItemMap;
     }
 
@@ -52,11 +53,13 @@ public class OrderQueryRepository {
         List<Long> orderIds = result.stream()
                 .map(o -> o.getOrderId())
                 .collect(Collectors.toList());
+
         return orderIds;
     }
 
 
     private List<OrderItemQueryDto> findOrderItems(Long orderId) {
+
         return em.createQuery(
                 "select new jpabook2.jpashop2.repository.order.query.OrderItemQueryDto(oi.order.id, i.name, oi.orderPrice, oi.count)" +
                         " from OrderItem oi" +
@@ -67,6 +70,7 @@ public class OrderQueryRepository {
     }
 
     private List<OrderQueryDto> findOrders() {
+
         return em.createQuery(
                 "select new jpabook2.jpashop2.repository.order.query.OrderQueryDto(o.id, m.name, o.orderDate, o.status, d.address)" +
                         " from Order o" +
@@ -76,6 +80,7 @@ public class OrderQueryRepository {
     }
 
     public List<OrderFlatDto> findAllByDto_flat() {
+
         return em.createQuery(
                 "select new jpabook2.jpashop2.repository.order.query.OrderFlatDto(o.id, m.name, o.orderDate, o.status, d.address, i.name, oi.orderPrice, oi.count)" +
                         " from Order o" +

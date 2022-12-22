@@ -40,14 +40,15 @@ public class OrderApiController {
     public List<Order> ordersV1() {
         List<Order> all = orderRepository.findAllByString(new OrderSearch());
         for (Order order : all) {
-            order.getMember().getName();
-            order.getDelivery().getAddress();
 
             // hibernate5Module은 프록시인 애는 데이터를 뿌리지 않음
             // 따라서 아래와 같이 강제 초기화
+            order.getMember().getName();
+            order.getDelivery().getAddress();
             List<OrderItem> orderItems = order.getOrderItems();
             orderItems.stream().forEach(o -> o.getItem().getName());
         }
+
         return all;
     }
 
@@ -60,29 +61,28 @@ public class OrderApiController {
         List<OrderDto> collect = orders.stream()
                 .map(o -> new OrderDto(o))
                 .collect(toList());
+
         return collect;
     }
 
     /**
-     * 주문 조회 V2: 엔티티를 DTO로 변환 - fetch join 최적화
+     * 주문 조회 V3: 엔티티를 DTO로 변환 - fetch join 최적화
      */
     @GetMapping("/api/v3/orders")
     public List<OrderDto> ordersV3() {
         List<Order> orders = orderRepository.findAllWithItem();
 
-        for (Order order : orders) {
-            System.out.println("order ref = " + order + " id = " + order.getId());
-        }
+        for (Order order : orders) { System.out.println("order ref = " + order + " id = " + order.getId()); }
 
         List<OrderDto> result = orders.stream()
                 .map(o -> new OrderDto(o))
                 .collect(toList());
+
         return result;
     }
 
     /**
      * 주문 조회 V3.1: 엔티티를 DTO로 변환 - 페이징과 한계 돌파
-     * V3.1 엔티티를 조회해서 DTO로 변환 (페이징 고려)
      * - ToOne 관계만 우선 모두 fetch join으로 최적화
      * - 컬렉션 관계는 hibernate.default_batch_fetch_size, @BatchSize로 최적화
      */
@@ -91,13 +91,12 @@ public class OrderApiController {
                                         @RequestParam(value = "limit", defaultValue = "100") int limit) {
         List<Order> orders = orderRepository.findAllWithMemberDelivery(offset, limit);
 
-        for (Order order : orders) {
-            System.out.println("order ref = " + order + " id = " + order.getId());
-        }
+        for (Order order : orders) { System.out.println("order ref = " + order + " id = " + order.getId()); }
 
         List<OrderDto> result = orders.stream()
                 .map(o -> new OrderDto(o))
                 .collect(toList());
+
         return result;
     }
 
@@ -123,6 +122,7 @@ public class OrderApiController {
     @GetMapping("/api/v6/orders")
     public List<OrderQueryDto> ordersV6() {
         List<OrderFlatDto> flats = orderQueryRepository.findAllByDto_flat();
+
         return flats.stream()
                 .collect(Collectors.groupingBy(o -> new OrderQueryDto(o.getOrderId(), o.getName(), o.getOrderDate(), o.getOrderStatus(), o.getAddress()),
                         mapping(o -> new OrderItemQueryDto(o.getOrderId(), o.getItemName(), o.getOrderPrice(), o.getCount()), toList())))
